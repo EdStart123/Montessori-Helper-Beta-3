@@ -58,6 +58,15 @@
         backdrop-filter: blur(10px);
       }
       .chip { background: rgba(55, 214, 122, .12); color:#37D67A; border: 1px solid rgba(55,214,122,.3); }
+      /* Green glow outline for sections */
+.glow {
+  border: 1px solid rgba(55, 214, 122, 0.55);
+  box-shadow:
+    0 0 0 1px rgba(55, 214, 122, 0.55),
+    0 8px 22px rgba(55, 214, 122, 0.18),
+    0 0 28px rgba(55, 214, 122, 0.18);
+}
+
     </style>
   </head>
 
@@ -79,6 +88,7 @@ const { useState, useMemo, useRef } = React;
 const Card = ({ className = "", children }) => (
   <div className={`glass border border-white/10 rounded-xl2 shadow-soft ${className}`}>{children}</div>
 );
+
 const SectionTitle = ({ children, right }) => (
   <div className="flex items-center justify-between mb-3">
     <h3 className="text-lg font-semibold headline text-white">{children}</h3>
@@ -122,10 +132,18 @@ const Placeholder = ({ children }) => (
 );
 function Logo() {
   return (
-    <div className="w-10 h-10 rounded-xl grid place-items-center text-white font-bold"
-         style={{ background: "linear-gradient(135deg,#7A3EFF 0%,#9B6BFF 70%)" }}>t</div>
+    <img
+      src="./logo.png"
+      alt="Thinkering Labs"
+      className="w-10 h-10 rounded-xl"
+      style={{
+        boxShadow:
+          "0 0 0 1px rgba(55,214,122,.55), 0 6px 18px rgba(55,214,122,.25)",
+      }}
+    />
   );
 }
+
 
 /* ================= Offline KB (same content) ================= */
 const KB = {
