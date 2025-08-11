@@ -4,31 +4,84 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Montessori Lesson Helper</title>
-    <!-- Tailwind CDN (no build needed) -->
+
+    <!-- Brand fonts (rounded headline + clean body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Tailwind (no build) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      /* Tailwind CDN theme override to match Thinkering Labs aesthetic */
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                ink:    "#0F1020",  /* very dark violet/blue */
+                surface:"#0C0B1E",
+                primary:"#7A3EFF",  /* vibrant purple */
+                accent: "#37D67A",  /* bright green */
+                lilac:  "#B993FF",
+                mist:   "#EDEBFF",
+                slate:  "#8E90A6"
+              }
+            },
+            boxShadow: {
+              soft: "0 12px 40px rgba(122,62,255,.18)"
+            },
+            borderRadius: {
+              xl2: "1.25rem"
+            }
+          }
+        }
+      }
+    </script>
+
+    <style>
+      :root {
+        --bg-grid: radial-gradient(1px 1px at 10px 10px, rgba(255,255,255,.06) 1px, transparent 0);
+      }
+      html, body { height: 100%; }
+      body {
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        background:
+          linear-gradient(180deg, #13122B 0%, #0D0C20 100%),
+          var(--bg-grid);
+        background-size: auto, 20px 20px;
+        color: #F6F7FB;
+      }
+      .headline { font-family: Poppins, Inter, sans-serif; letter-spacing: -0.02em; }
+      .glass {
+        background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+        backdrop-filter: blur(10px);
+      }
+      .chip { background: rgba(55, 214, 122, .12); color:#37D67A; border: 1px solid rgba(55,214,122,.3); }
+    </style>
   </head>
-  <body class="min-h-screen bg-zinc-50">
+
+  <body class="min-h-screen">
     <div id="root"></div>
 
-    <!-- React + ReactDOM from CDN -->
+    <!-- React + ReactDOM -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 
-    <!-- Babel Standalone (transpile JSX in the browser) -->
+    <!-- Babel (so we can write JSX without a build) -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- Your app code (JSX) -->
+    <!-- App (same logic, re-skinned) -->
     <script type="text/babel">
-// Montessori Lesson Helper (no-build GH Pages version)
+/* ================= UI atoms (branded) ================= */
 const { useState, useMemo, useRef } = React;
 
-// --- UI atoms ---
 const Card = ({ className = "", children }) => (
-  <div className={`bg-white border border-zinc-200 rounded-2xl shadow-sm ${className}`}>{children}</div>
+  <div className={`glass border border-white/10 rounded-xl2 shadow-soft ${className}`}>{children}</div>
 );
 const SectionTitle = ({ children, right }) => (
   <div className="flex items-center justify-between mb-3">
-    <h3 className="text-lg font-semibold tracking-tight text-zinc-900">{children}</h3>
+    <h3 className="text-lg font-semibold headline text-white">{children}</h3>
     {right}
   </div>
 );
@@ -37,7 +90,8 @@ const Button = ({ children, onClick, type = "button", disabled, className = "" }
     type={type}
     onClick={onClick}
     disabled={disabled}
-    className={`px-4 h-11 rounded-xl border border-zinc-300 bg-zinc-50 hover:bg-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+    className={`px-4 h-11 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white/90 transition
+                disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
   >
     {children}
   </button>
@@ -47,7 +101,8 @@ const PrimaryButton = ({ children, onClick, type = "button", disabled, className
     type={type}
     onClick={onClick}
     disabled={disabled}
-    className={`px-4 h-11 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+    className={`px-5 h-11 rounded-xl bg-brand-primary hover:brightness-110 text-white font-semibold
+                shadow-soft transition disabled:opacity-50 ${className}`}
   >
     {children}
   </button>
@@ -55,34 +110,38 @@ const PrimaryButton = ({ children, onClick, type = "button", disabled, className
 const Input = (props) => (
   <input
     {...props}
-    className={`w-full h-11 rounded-xl border border-zinc-300 px-3 bg-white focus:outline-none focus:ring-4 focus:ring-indigo-100 ${props.className || ""}`}
+    className={`w-full h-11 rounded-xl border border-white/10 px-3 bg-white/5 text-white placeholder-white/40
+                focus:outline-none focus:ring-4 focus:ring-brand-primary/20 ${props.className || ""}`}
   />
 );
 const Badge = ({ children }) => (
-  <span className="inline-block text-xs bg-zinc-100 text-zinc-700 px-2.5 py-1 rounded-full border border-zinc-200">{children}</span>
+  <span className="chip inline-block text-xs px-2.5 py-1 rounded-full">{children}</span>
 );
-function Placeholder({ children }) {
-  return <div className="rounded-xl border border-dashed border-zinc-300 p-6 text-sm text-zinc-600 bg-zinc-50">{children}</div>;
-}
+const Placeholder = ({ children }) => (
+  <div className="rounded-xl border border-dashed border-white/15 p-6 text-sm text-white/70 bg-white/5">{children}</div>
+);
 function Logo() {
-  return <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 grid place-items-center text-white font-bold">M</div>;
+  return (
+    <div className="w-10 h-10 rounded-xl grid place-items-center text-white font-bold"
+         style={{ background: "linear-gradient(135deg,#7A3EFF 0%,#9B6BFF 70%)" }}>t</div>
+  );
 }
 
-// --- Offline Montessori KB (condensed) ---
+/* ================= Offline KB (same content) ================= */
 const KB = {
   "Pink Tower": {
     aliases: ["pink tower", "pink cubes", "tower of cubes"],
     age: "2.5–4 years",
-    aims: ["Visual discrimination of size", "Preparation for mathematics (base‑10)", "Concentration and coordination"],
-    control: "Child can self‑correct by seeing gaps or misalignment when stacking largest to smallest.",
+    aims: ["Visual discrimination of size", "Preparation for mathematics (base-10)", "Concentration and coordination"],
+    control: "Child can self-correct by seeing gaps or misalignment when stacking largest to smallest.",
     steps: [
       "Invite the child, carry cubes one by one on a tray or two hands to the work mat.",
       "Arrange cubes randomly; isolate the largest and smallest to establish contrast.",
-      "Build from largest to smallest, centered carefully; use 3‑finger grasp.",
-      "Invite the child to repeat; later introduce the broad stair language: large, larger, largest.",
+      "Build from largest to smallest, centered carefully; use 3-finger grasp.",
+      "Invite the child to repeat; later introduce the broad stair language: large, larger, largest."
     ],
     extensions: ["Build horizontally as a train", "Construct with a control card silhouette", "Match to Pink Tower card set"],
-    videoQueries: ["Montessori Pink Tower presentation", "Pink Tower lesson AMS/AMI"],
+    videoQueries: ["Montessori Pink Tower presentation", "Pink Tower lesson AMS/AMI"]
   },
   "Brown Stair": {
     aliases: ["brown stair", "broad stair", "prisms"],
@@ -93,10 +152,10 @@ const KB = {
       "Carry prisms to mat with two hands (heaviest at the bottom).",
       "Arrange randomly; isolate thickest and thinnest.",
       "Build stair from thickest to thinnest; edges flush.",
-      "Invite repetition; later combine with Pink Tower.",
+      "Invite repetition; later combine with Pink Tower."
     ],
     extensions: ["Stair maze with blindfold walking finger", "Alternating tower with Pink Tower"],
-    videoQueries: ["Montessori Broad Stair lesson", "Brown Stair presentation"],
+    videoQueries: ["Montessori Broad Stair lesson", "Brown Stair presentation"]
   },
   "Cylinder Blocks": {
     aliases: ["cylinder block", "knobbed cylinders", "cylinders with knobs"],
@@ -106,23 +165,23 @@ const KB = {
     steps: [
       "Carry one block to the mat; remove cylinders left to right using pincer grasp.",
       "Mix cylinders; replace by testing sockets, emphasizing control of movement.",
-      "Increase challenge with eyes closed or mixed sets (later).",
+      "Increase challenge with eyes closed or mixed sets (later)."
     ],
     extensions: ["Pattern games across two blocks", "Timing challenges with metronome"],
-    videoQueries: ["Montessori knobbed cylinders presentation"],
+    videoQueries: ["Montessori knobbed cylinders presentation"]
   },
   "Sandpaper Letters": {
     aliases: ["sandpaper letters", "letters rough", "tactile alphabet"],
     age: "3–6 years",
-    aims: ["Letter‑sound association (phonemic awareness)", "Preparation for writing through tactile tracing"],
-    control: "Adult models correct formation; child self‑feels correct path while tracing.",
+    aims: ["Letter-sound association (phonemic awareness)", "Preparation for writing through tactile tracing"],
+    control: "Adult models correct formation; child self-feels correct path while tracing.",
     steps: [
-      "Present 2–3 letters using the Three‑Period Lesson.",
+      "Present 2–3 letters using the Three-Period Lesson.",
       "Trace with two fingers while saying the sound; invite the child.",
-      "Vary letters over days; keep sounds short and pure.",
+      "Vary letters over days; keep sounds short and pure."
     ],
     extensions: ["Match objects with initial sound", "Write in sand tray"],
-    videoQueries: ["Montessori sandpaper letters lesson"],
+    videoQueries: ["Montessori sandpaper letters lesson"]
   },
   "Movable Alphabet": {
     aliases: ["moveable alphabet", "movable alphabet", "alphabet box"],
@@ -132,10 +191,10 @@ const KB = {
     steps: [
       "Invite child to encode simple CVC words using sounds they know.",
       "Segment sounds orally; select letters; read back together.",
-      "Extend to phrases and simple sentences.",
+      "Extend to phrases and simple sentences."
     ],
     extensions: ["Story building with picture prompts", "Word families sorting"],
-    videoQueries: ["Montessori movable alphabet presentation"],
+    videoQueries: ["Montessori movable alphabet presentation"]
   },
   "Number Rods": {
     aliases: ["number rods", "red and blue rods"],
@@ -144,10 +203,10 @@ const KB = {
     control: "Visual patterning; rods only align correctly in sequence.",
     steps: [
       "Lay rods randomly; build stair 1–10 left to right.",
-      "Touch count each unit; introduce symbols later.",
+      "Touch count each unit; introduce symbols later."
     ],
     extensions: ["Missing rod game", "Addition by combining rods"],
-    videoQueries: ["Montessori number rods presentation"],
+    videoQueries: ["Montessori number rods presentation"]
   },
   "Golden Beads": {
     aliases: ["golden beads", "decimal system beads", "unit ten hundred thousand"],
@@ -156,11 +215,11 @@ const KB = {
     control: "Physical quantities must match symbols; bank game checks errors.",
     steps: [
       "Introduce unit, ten bar, hundred square, thousand cube.",
-      "Three‑Period Lesson for names; build quantities to match symbols.",
-      "Bank Game: exchange and operations (later).",
+      "Three-Period Lesson for names; build quantities to match symbols.",
+      "Bank Game: exchange and operations (later)."
     ],
     extensions: ["Static and dynamic addition", "Exchange games"],
-    videoQueries: ["Montessori golden beads lesson", "Montessori bank game"],
+    videoQueries: ["Montessori golden beads lesson", "Montessori bank game"]
   },
   "Metal Insets": {
     aliases: ["metal insets", "writing insets"],
@@ -169,81 +228,72 @@ const KB = {
     control: "Lines within frames reveal control; smudges indicate pressure issues.",
     steps: [
       "Choose a shape; trace frame then inset onto paper.",
-      "Shade with parallel lines; vary direction next time.",
+      "Shade with parallel lines; vary direction next time."
     ],
     extensions: ["Pattern compositions", "Gradation of pressure games"],
-    videoQueries: ["Montessori metal insets presentation"],
+    videoQueries: ["Montessori metal insets presentation"]
   },
   "Binomial Cube": {
     aliases: ["binomial cube", "algebraic cube"],
     age: "3.5–6+ years",
-    aims: ["Visual‑spatial logic", "Indirect prep for (a+b)^3"],
-    control: "Color coding and box constraints self‑correct.",
+    aims: ["Visual-spatial logic", "Indirect prep for (a+b)^3"],
+    control: "Color coding and box constraints self-correct.",
     steps: [
       "Open box; remove layers keeping orientation.",
-      "Rebuild outside the box using color control; return to box.",
+      "Rebuild outside the box using color control; return to box."
     ],
     extensions: ["Blind build", "Name colors and layers later"],
-    videoQueries: ["Montessori binomial cube lesson"],
+    videoQueries: ["Montessori binomial cube lesson"]
   },
   "Trinomial Cube": {
     aliases: ["trinomial cube"],
     age: "4–7+ years",
-    aims: ["Visual‑spatial logic", "Indirect prep for (a+b+c)^3"],
-    control: "Color coding and box constraints self‑correct.",
+    aims: ["Visual-spatial logic", "Indirect prep for (a+b+c)^3"],
+    control: "Color coding and box constraints self-correct.",
     steps: [
       "Remove to mat in order; rebuild using color and size cues.",
-      "Return to box when complete.",
+      "Return to box when complete."
     ],
     extensions: ["Time challenge", "Name sides later"],
-    videoQueries: ["Montessori trinomial cube presentation"],
+    videoQueries: ["Montessori trinomial cube presentation"]
   },
   "Geometric Solids": {
     aliases: ["geometric solids", "sphere cube cone cylinder"],
     age: "3–6 years",
     aims: ["Solid geometry vocabulary", "Sensorial exploration"],
-    control: "Three‑Period Lesson mastery; matching bases to solids.",
+    control: "Three-Period Lesson mastery; matching bases to solids.",
     steps: [
       "Explore solids with hands and movement (roll/slide).",
-      "Name 2–3 solids; play identification games.",
+      "Name 2–3 solids; play identification games."
     ],
     extensions: ["Object hunt for shapes", "Base matching"],
-    videoQueries: ["Montessori geometric solids lesson"],
-  },
+    videoQueries: ["Montessori geometric solids lesson"]
+  }
 };
 const ALL_MATERIALS = Object.keys(KB);
-const aliasIndex = Object.fromEntries(Object.entries(KB).flatMap(([name, v]) => v.aliases.map((a) => [a.toLowerCase(), name])));
+const aliasIndex = Object.fromEntries(Object.entries(KB).flatMap(([name, v]) => v.aliases.map(a => [a.toLowerCase(), name])));
 
-function dataURLFromFile(file) {
-  return new Promise((resolve, reject) => {
-    const fr = new FileReader();
-    fr.onload = () => resolve(fr.result);
-    fr.onerror = reject;
-    fr.readAsDataURL(file);
-  });
-}
+/* Helpers */
+function dataURLFromFile(file){ return new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=rej; fr.readAsDataURL(file); }); }
 
+/* File input cluster */
 function FileInputSection({ onFile }) {
   return (
     <div className="space-y-2">
-      <span className="block text-sm font-medium">Add Image</span>
+      <span className="block text-sm font-medium text-white/80">Add Image</span>
       <div className="grid grid-cols-1 gap-2">
         <label className="block text-sm">
-          <span className="block mb-1">Upload from files</span>
+          <span className="block mb-1 text-white/70">Upload from files</span>
           <Input type="file" accept="image/*" onChange={onFile} />
         </label>
         <label className="block text-sm">
-          <span className="block mb-1">Use camera</span>
+          <span className="block mb-1 text-white/70">Use camera</span>
           <Input type="file" accept="image/*" capture="environment" onChange={onFile} />
         </label>
         <div
-          className="border-2 border-dashed border-zinc-300 rounded-xl p-3 text-center text-sm text-zinc-600"
+          className="border-2 border-dashed border-white/15 rounded-xl p-3 text-center text-sm text-white/70 bg-white/5"
           onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => {
-            e.preventDefault();
-            const f = e.dataTransfer?.files?.[0] || null;
-            if (f) onFile({ target: { files: [f] } });
-          }}
+          onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer?.files?.[0] || null; if (f) onFile({ target: { files: [f] } }); }}
         >
           Or drag & drop an image here
         </div>
@@ -252,165 +302,126 @@ function FileInputSection({ onFile }) {
   );
 }
 
-function ApiKeyPopover({ apiKey, setApiKey, model, setModel }) {
-  const [open, setOpen] = React.useState(false);
-  const [localKey, setLocalKey] = React.useState(apiKey);
-  const [localModel, setLocalModel] = React.useState(model);
-  const ref = React.useRef(null);
-
-  return (
-    <div className="relative" ref={ref}>
-      <Button onClick={() => setOpen((v) => !v)}>{apiKey ? "Settings" : "Add API key"}</Button>
-      {open && (
-        <div className="absolute right-0 mt-2 w-[360px] p-4 bg-white border border-zinc-200 rounded-2xl shadow-xl z-50">
-          <div className="flex items-center justify-between mb-2">
-            <div className="font-medium">Settings</div>
-            <button onClick={() => setOpen(false)} className="text-zinc-500 hover:text-zinc-800">✕</button>
-          </div>
-          <label className="block text-sm mb-3">
-            <span className="block text-zinc-700 mb-1">OpenAI API key (optional)</span>
-            <Input value={localKey} onChange={(e) => setLocalKey(e.target.value)} placeholder="sk-..." />
-            <span className="block text-xs text-zinc-500 mt-1">Stored in memory only during this session.</span>
-          </label>
-          <label className="block text-sm mb-3">
-            <span className="block text-zinc-700 mb-1">Model</span>
-            <select value={localModel} onChange={(e) => setLocalModel(e.target.value)} className="w-full h-11 rounded-xl border border-zinc-300 bg-white px-3">
-              <option value="gpt-4o-mini">gpt-4o-mini (vision + chat)</option>
-              <option value="gpt-4o">gpt-4o (vision + chat)</option>
-              <option value="gpt-4-turbo">gpt-4-turbo (text)</option>
-            </select>
-          </label>
-          <div className="flex items-center justify-end gap-2">
-            <Button onClick={() => { setLocalKey(""); setLocalModel("gpt-4o-mini"); }}>Clear</Button>
-            <PrimaryButton onClick={() => { setApiKey(localKey.trim()); setModel(localModel); setOpen(false); }}>Save</PrimaryButton>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
+/* App */
 function App() {
-  const [apiKey, setApiKey] = React.useState("");
-  const [model, setModel] = React.useState("gpt-4o-mini");
-  const [img, setImg] = React.useState(null);
-  const [guess, setGuess] = React.useState(null);
-  const [loadingDetect, setLoadingDetect] = React.useState(false);
-  const [error, setError] = React.useState("");
-  const [selected, setSelected] = React.useState(null);
-  const [videos, setVideos] = React.useState([]);
-  const [chatInput, setChatInput] = React.useState("");
-  const [chatLoading, setChatLoading] = React.useState(false);
-  const [messages, setMessages] = React.useState([{ role: "assistant", content: "Hi! I’m your Montessori coach. Ask me about presentations, extensions, and scaffolding." }]);
+  const [apiKey, setApiKey] = useState("");
+  const [model, setModel] = useState("gpt-4o-mini");
+  const [img, setImg] = useState(null);
+  const [guess, setGuess] = useState(null);
+  const [loadingDetect, setLoadingDetect] = useState(false);
+  const [error, setError] = useState("");
+  const [selected, setSelected] = useState(null);
+  const [videos, setVideos] = useState([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+  const [messages, setMessages] = useState([{ role: "assistant", content: "Hi! I’m your Montessori coach. Ask me about presentations, extensions, and scaffolding." }]);
 
-  const material = React.useMemo(() => (selected ? KB[selected] : null), [selected]);
+  const material = useMemo(() => (selected ? KB[selected] : null), [selected]);
 
-  function makeVideoQueries(name) {
-    const q = KB[name]?.videoQueries?.[0] || `${name} Montessori lesson`;
+  function makeVideoQueries(name){
+    const q  = KB[name]?.videoQueries?.[0] || `${name} Montessori lesson`;
     const q2 = KB[name]?.videoQueries?.[1] || `${name} presentation`;
     return [
       `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`,
-      `https://www.youtube.com/results?search_query=${encodeURIComponent(q2)}`,
+      `https://www.youtube.com/results?search_query=${encodeURIComponent(q2)}`
     ];
   }
 
-  async function onFile(e) {
-    const f = e?.target?.files?.[0] || null;
-    if (!f) return;
-    try {
+  async function onFile(e){
+    const f = e?.target?.files?.[0] || null; if(!f) return;
+    try{
       setError("");
       const url = await dataURLFromFile(f);
       setImg(url); setGuess(null); setSelected(null);
-      if (apiKey) {
-        await runVisionDetect(url);
-      } else {
+      if(apiKey){ await runVisionDetect(url); }
+      else {
         const name = f.name?.toLowerCase() || "";
-        const hit = Object.keys(aliasIndex).find((a) => name.includes(a));
-        if (hit) { const canonical = aliasIndex[hit]; setGuess(canonical); setSelected(canonical); setVideos(makeVideoQueries(canonical)); }
+        const hit  = Object.keys(aliasIndex).find(a => name.includes(a));
+        if(hit){ const canonical = aliasIndex[hit]; setGuess(canonical); setSelected(canonical); setVideos(makeVideoQueries(canonical)); }
       }
-    } catch (err) { setError(String(err && err.message ? err.message : err)); }
+    } catch(err){ setError(String(err?.message || err)); }
   }
 
-  async function runVisionDetect(dataUrl) {
+  async function runVisionDetect(dataUrl){
     setLoadingDetect(true); setError("");
-    try {
+    try{
       const res = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+        method:"POST",
+        headers:{ "Content-Type":"application/json", Authorization:`Bearer ${apiKey}` },
         body: JSON.stringify({
           model,
-          messages: [
-            { role: "system", content: "You are a Montessori material identifier. Return only the canonical material NAME from this list if applicable: " + ALL_MATERIALS.join(", ") + ". If unsure, say 'Unknown'." },
-            { role: "user", content: [{ type: "text", text: "Identify the Montessori material in this image by its canonical name." }, { type: "image_url", image_url: { url: dataUrl } }] }
+          messages:[
+            { role:"system", content:"You are a Montessori material identifier. Return only the canonical NAME from this list if applicable: " + ALL_MATERIALS.join(", ") + ". If unsure, say 'Unknown'."},
+            { role:"user", content:[ {type:"text", text:"Identify the Montessori material by its canonical name."}, {type:"image_url", image_url:{url:dataUrl}} ] }
           ],
-          temperature: 0, max_tokens: 25
+          temperature:0, max_tokens:25
         })
       });
-      if (!res.ok) throw new Error(await res.text());
+      if(!res.ok) throw new Error(await res.text());
       const json = await res.json();
       const name = (json.choices?.[0]?.message?.content || "").trim();
       const canonical = ALL_MATERIALS.includes(name) ? name : null;
-      if (canonical) { setGuess(canonical); setSelected(canonical); setVideos(makeVideoQueries(canonical)); } else { setGuess("Unknown"); }
-    } catch (e) { setError(String(e && e.message ? e.message : e)); }
-    finally { setLoadingDetect(false); }
+      if(canonical){ setGuess(canonical); setSelected(canonical); setVideos(makeVideoQueries(canonical)); }
+      else { setGuess("Unknown"); }
+    }catch(e){ setError(String(e?.message || e)); }
+    finally{ setLoadingDetect(false); }
   }
 
-  async function sendChat() {
-    if (!chatInput.trim()) return;
-    const userMsg = { role: "user", content: chatInput.trim() };
-    setMessages((m) => [...m, userMsg]); setChatInput("");
+  async function sendChat(){
+    if(!chatInput.trim()) return;
+    const userMsg = { role:"user", content: chatInput.trim() };
+    setMessages(m => [...m, userMsg]); setChatInput("");
 
-    if (!apiKey) {
-      const kbText = selected ? offlineCoach(selected, userMsg.content) : "I can give detailed guidance if you paste an OpenAI API key in Settings, or select a material from the list.";
-      setMessages((m) => [...m, { role: "assistant", content: kbText }]); return;
+    if(!apiKey){
+      const kbText = selected ? offlineCoach(selected, userMsg.content)
+                              : "I can give detailed guidance if you paste an OpenAI API key in Settings, or select a material from the list.";
+      setMessages(m => [...m, { role:"assistant", content: kbText }]); return;
     }
 
     setChatLoading(true);
-    try {
+    try{
       const res = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+        method:"POST",
+        headers:{ "Content-Type":"application/json", Authorization:`Bearer ${apiKey}` },
         body: JSON.stringify({
           model,
-          messages: [
-            { role: "system", content: "You are a certified Montessori guide (3-6 focus). Give concise, classroom-ready advice, cite control of error and indirect aims when relevant." },
-            ...(selected ? [{ role: "system", content: `The current material is: ${selected}. Use its standard presentation unless asked otherwise.` }] : []),
+          messages:[
+            { role:"system", content:"You are a certified Montessori guide (3-6). Be concise, specific, cite control of error/indirect aims when relevant." },
+            ...(selected ? [{ role:"system", content:`The current material is: ${selected}. Use its standard presentation unless asked otherwise.` }] : []),
             ...messages, userMsg
           ],
-          temperature: 0.3
+          temperature:0.3
         })
       });
-      if (!res.ok) throw new Error(await res.text());
+      if(!res.ok) throw new Error(await res.text());
       const json = await res.json();
       const reply = json.choices?.[0]?.message?.content || "";
-      setMessages((m) => [...m, { role: "assistant", content: reply }]);
-    } catch (e) {
-      setMessages((m) => [...m, { role: "assistant", content: `Hmm, I couldn't reach the AI right now. ${String(e && e.message ? e.message : e)}` }]);
-    } finally { setChatLoading(false); }
+      setMessages(m => [...m, { role:"assistant", content: reply }]);
+    }catch(e){
+      setMessages(m => [...m, { role:"assistant", content:`Hmm, I couldn't reach the AI right now. ${String(e?.message || e)}` }]);
+    }finally{ setChatLoading(false); }
   }
 
-  function offlineCoach(name, q) {
-    const kb = KB[name]; if (!kb) return "I couldn't find that in my offline set. Try another material.";
+  function offlineCoach(name, q){
+    const kb = KB[name]; if(!kb) return "I couldn't find that in my offline set. Try another material.";
     const lower = q.toLowerCase();
-    if (lower.includes("present") || lower.includes("how to") || lower.includes("steps")) {
-      return `Presentation for ${name}:\n• ${kb.steps.join("\n• ")}`;
-    }
-    if (lower.includes("control of error") || lower.includes("error")) return `Control of error for ${name}: ${kb.control}`;
-    if (lower.includes("aim") || lower.includes("goal")) return `Direct aims: ${kb.aims.join(", ")}`;
-    if (lower.includes("age") || lower.includes("when")) return `${name} typical age range: ${kb.age}`;
-    if (lower.includes("extension") || lower.includes("challenge")) return `Extensions for ${name}: ${kb.extensions.join(", ")}`;
-    return `Here are quick facts on ${name}:\n• Age: ${kb.age}\n• Aims: ${kb.aims.join(", ")}\n• Control of Error: ${kb.control}\n• First Steps: ${kb.steps.slice(0, 2).join(" → ")}`;
+    if(lower.includes("present") || lower.includes("how to") || lower.includes("steps")) return `Presentation for ${name}:\n• ${kb.steps.join("\n• ")}`;
+    if(lower.includes("control of error") || lower.includes("error")) return `Control of error for ${name}: ${kb.control}`;
+    if(lower.includes("aim") || lower.includes("goal")) return `Direct aims: ${kb.aims.join(", ")}`;
+    if(lower.includes("age") || lower.includes("when")) return `${name} typical age range: ${kb.age}`;
+    if(lower.includes("extension") || lower.includes("challenge")) return `Extensions for ${name}: ${kb.extensions.join(", ")}`;
+    return `Here are quick facts on ${name}:\n• Age: ${kb.age}\n• Aims: ${kb.aims.join(", ")}\n• Control of Error: ${kb.control}\n• First Steps: ${kb.steps.slice(0,2).join(" → ")}`;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-white text-zinc-900">
-      <header className="sticky top-0 z-10 backdrop-blur bg-white/80 border-b border-zinc-200">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+    <div className="min-h-screen">
+      <header className="sticky top-0 z-10 border-b border-white/10 bg-gradient-to-b from-white/10 to-transparent">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <Logo />
             <div>
-              <h1 className="text-xl font-semibold tracking-tight">Montessori Lesson Helper</h1>
-              <p className="text-sm text-zinc-600 -mt-0.5">Snap a material → get presentation steps, videos, and coaching</p>
+              <h1 className="text-[26px] headline font-semibold text-white">Montessori Lesson Helper</h1>
+              <p className="text-sm text-white/70 -mt-0.5">Snap a material → get steps, videos, and coaching</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -419,24 +430,22 @@ function App() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-6 grid lg:grid-cols-3 gap-6">
+      <main className="max-w-6xl mx-auto px-4 py-8 grid lg:grid-cols-3 gap-6">
         {/* Left: Capture & Detect */}
         <div className="lg:col-span-2 space-y-6">
           <Card className="p-4">
-            <SectionTitle right={<Badge>{apiKey ? "AI Vision on" : "Offline mode"}</Badge>}>
-              Capture or Upload
-            </SectionTitle>
+            <SectionTitle right={<Badge>{apiKey ? "AI Vision on" : "Offline mode"}</Badge>}>Capture or Upload</SectionTitle>
             <div className="grid md:grid-cols-[1fr,280px] gap-4 items-start">
               <div
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer?.files?.[0] || null; if (f) onFile({ target: { files: [f] } }); }}
               >
                 {img ? (
-                  <div className="relative aspect-[16/10] bg-zinc-100 rounded-xl overflow-hidden border border-zinc-200">
+                  <div className="relative aspect-[16/10] bg-black/30 rounded-xl overflow-hidden border border-white/10">
                     <img src={img} alt="Uploaded" className="w-full h-full object-contain" />
                   </div>
                 ) : (
-                  <div className="aspect-[16/10] rounded-xl border-2 border-dashed border-zinc-300 grid place-items-center text-zinc-500">
+                  <div className="aspect-[16/10] rounded-xl border-2 border-dashed border-white/15 grid place-items-center text-white/60">
                     <div className="text-center px-6">
                       <p className="font-medium">Drop an image here</p>
                       <p className="text-sm">…or use Upload/Camera on the right.</p>
@@ -446,25 +455,31 @@ function App() {
               </div>
               <div className="space-y-3">
                 <FileInputSection onFile={onFile} />
-                <div className="text-sm text-zinc-600">
+                <div className="text-sm text-white/70">
                   {loadingDetect ? "Analyzing image…" : guess ? (
                     <div>
-                      <div className="font-medium">Detected: <span className="text-indigo-700">{guess}</span></div>
+                      <div className="font-medium">Detected: <span className="text-brand-accent">{guess}</span></div>
                       <div className="mt-2">
                         <Button onClick={() => setSelected(guess)} className="mr-2">Use this</Button>
                         <Button onClick={() => setGuess(null)}>Clear</Button>
                       </div>
                     </div>
                   ) : (
-                    <span>{apiKey ? "Upload to auto‑identify." : "Tip: Add an API key in Settings for auto‑ID, or pick from the list below."}</span>
+                    <span>{apiKey ? "Upload to auto-identify." : "Tip: Add an API key in Settings for auto-ID, or pick from the list below."}</span>
                   )}
-                  {error && <div className="text-rose-600 mt-2">{error}</div>}
+                  {error && <div className="text-rose-400 mt-2">{error}</div>}
                 </div>
                 <div>
-                  <span className="text-sm font-medium">Quick Pick</span>
+                  <span className="text-sm font-medium text-white/80">Quick Pick</span>
                   <div className="mt-2 grid grid-cols-2 gap-2 max-h-48 overflow-auto pr-1">
-                    {Object.keys(KB).map((m) => (
-                      <button key={m} onClick={() => { setSelected(m); setVideos(makeVideoQueries(m)); }} className={`text-left text-sm px-3 py-2 rounded-lg border ${selected===m? 'border-indigo-500 bg-indigo-50' : 'border-zinc-300 hover:bg-zinc-50'}`}>
+                    {ALL_MATERIALS.map((m) => (
+                      <button
+                        key={m}
+                        onClick={() => { setSelected(m); setVideos(makeVideoQueries(m)); }}
+                        className={`text-left text-sm px-3 py-2 rounded-lg border ${
+                          selected === m ? "border-brand-primary/60 bg-brand-primary/15" : "border-white/10 bg-white/5 hover:bg-white/10"
+                        } text-white/90`}
+                      >
                         {m}
                       </button>
                     ))}
@@ -480,30 +495,26 @@ function App() {
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge>Age: {material?.age}</Badge>
-                  <Badge>Direct aims: {material?.aims?.slice(0, 2).join(", ")}…</Badge>
+                  <Badge>Direct aims: {material?.aims?.slice(0,2).join(", ")}…</Badge>
                 </div>
                 <div>
-                  <h4 className="font-medium mb-2">How to present</h4>
-                  <ol className="list-decimal ml-5 leading-7 text-zinc-800">
-                    {material?.steps?.map((s, i) => <li key={i}>{s}</li>)}
+                  <h4 className="font-medium mb-2 headline">How to present</h4>
+                  <ol className="list-decimal ml-5 leading-7 text-white/90">
+                    {material?.steps?.map((s,i)=><li key={i}>{s}</li>)}
                   </ol>
                 </div>
                 <div className="grid md:grid-cols-3 gap-4">
                   <div>
-                    <h4 className="font-medium mb-1">Direct aims</h4>
-                    <ul className="list-disc ml-5 text-zinc-800">
-                      {material?.aims?.map((a, i) => <li key={i}>{a}</li>)}
-                    </ul>
+                    <h4 className="font-medium mb-1 headline">Direct aims</h4>
+                    <ul className="list-disc ml-5 text-white/90">{material?.aims?.map((a,i)=><li key={i}>{a}</li>)}</ul>
                   </div>
                   <div>
-                    <h4 className="font-medium mb-1">Control of error</h4>
-                    <p className="text-zinc-800">{material?.control}</p>
+                    <h4 className="font-medium mb-1 headline">Control of error</h4>
+                    <p className="text-white/90">{material?.control}</p>
                   </div>
                   <div>
-                    <h4 className="font-medium mb-1">Extensions</h4>
-                    <ul className="list-disc ml-5 text-zinc-800">
-                      {material?.extensions?.map((x, i) => <li key={i}>{x}</li>)}
-                    </ul>
+                    <h4 className="font-medium mb-1 headline">Extensions</h4>
+                    <ul className="list-disc ml-5 text-white/90">{material?.extensions?.map((x,i)=><li key={i}>{x}</li>)}</ul>
                   </div>
                 </div>
               </div>
@@ -514,10 +525,11 @@ function App() {
             <SectionTitle>Recommended Videos</SectionTitle>
             {selected ? (
               <div className="grid md:grid-cols-2 gap-3">
-                {videos.map((v, i) => (
-                  <a key={i} href={v} target="_blank" rel="noreferrer" className="block p-3 rounded-xl border border-zinc-300 hover:bg-zinc-50">
-                    <div className="text-sm font-medium">YouTube search</div>
-                    <div className="text-xs text-zinc-600 mt-1 break-all">{v}</div>
+                {videos.map((v,i)=>(
+                  <a key={i} href={v} target="_blank" rel="noreferrer"
+                     className="block p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10">
+                    <div className="text-sm font-medium text-white">YouTube search</div>
+                    <div className="text-xs text-white/70 mt-1 break-all">{v}</div>
                   </a>
                 ))}
               </div>
@@ -529,36 +541,78 @@ function App() {
         <div className="space-y-6">
           <Card className="p-4 h-full">
             <SectionTitle right={<Badge>{apiKey ? "AI Chat on" : "Offline chat"}</Badge>}>Montessori Coach</SectionTitle>
-            <div className="h-[420px] border border-zinc-200 rounded-xl overflow-hidden flex flex-col">
-              <div className="flex-1 overflow-auto p-3 space-y-3 bg-zinc-50">
-                {messages.map((m, i) => (
-                  <div key={i} className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-6 ${m.role === "assistant" ? "bg-white border border-zinc-200" : "bg-indigo-600 text-white ml-auto"}`}>
+            <div className="h-[420px] border border-white/10 rounded-xl overflow-hidden flex flex-col bg-white/5">
+              <div className="flex-1 overflow-auto p-3 space-y-3">
+                {messages.map((m,i)=>(
+                  <div key={i}
+                    className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-6 ${
+                      m.role === "assistant" ? "bg-white/10 border border-white/10 text-white" : "bg-brand-primary text-white ml-auto"
+                    }`}>
                     {m.content}
                   </div>
                 ))}
               </div>
-              <div className="p-2 border-t border-zinc-200 bg-white">
-                <form onSubmit={(e) => { e.preventDefault(); sendChat(); }} className="flex items-center gap-2">
-                  <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder={selected ? `Ask about ${selected}…` : "Ask any Montessori question…"} />
+              <div className="p-2 border-t border-white/10">
+                <form onSubmit={(e)=>{e.preventDefault(); sendChat();}} className="flex items-center gap-2">
+                  <Input value={chatInput} onChange={(e)=>setChatInput(e.target.value)}
+                         placeholder={selected ? `Ask about ${selected}…` : "Ask any Montessori question…"} />
                   <PrimaryButton type="submit" disabled={chatLoading}>{chatLoading ? "Sending…" : "Send"}</PrimaryButton>
                 </form>
-                {!apiKey && <p className="text-xs text-zinc-500 mt-2">Tip: Add an OpenAI API key in Settings for deeper, personalized coaching.</p>}
+                {!apiKey && <p className="text-xs text-white/60 mt-2">Tip: Add an OpenAI API key in Settings for deeper, personalized coaching.</p>}
               </div>
             </div>
           </Card>
         </div>
       </main>
 
-      <footer className="max-w-6xl mx-auto px-4 pb-10 text-xs text-zinc-500">
+      <footer className="max-w-6xl mx-auto px-4 pb-10 text-xs text-white/60">
         <p>Built for educators. Offline knowledge is adapted from widely used Montessori training references; always align with your program’s scope & sequence.</p>
       </footer>
     </div>
   );
 }
 
-function AppShell() { return <App />; }
-ReactDOM.createRoot(document.getElementById('root')).render(<AppShell />);
+/* Settings popover (reuses atoms) */
+function ApiKeyPopover({ apiKey, setApiKey, model, setModel }) {
+  const [open, setOpen] = useState(false);
+  const [localKey, setLocalKey] = useState(apiKey);
+  const [localModel, setLocalModel] = useState(model);
+  const ref = useRef(null);
+  return (
+    <div className="relative" ref={ref}>
+      <Button onClick={() => setOpen(v=>!v)}>{apiKey ? "Settings" : "Add API key"}</Button>
+      {open && (
+        <div className="absolute right-0 mt-2 w-[360px] p-4 rounded-xl2 shadow-soft border border-white/10 glass z-50">
+          <div className="flex items-center justify-between mb-2">
+            <div className="font-medium">Settings</div>
+            <button onClick={() => setOpen(false)} className="text-white/70 hover:text-white">✕</button>
+          </div>
+          <label className="block text-sm mb-3">
+            <span className="block text-white/80 mb-1">OpenAI API key (optional)</span>
+            <Input value={localKey} onChange={(e)=>setLocalKey(e.target.value)} placeholder="sk-..." />
+            <span className="block text-xs text-white/60 mt-1">Stored in memory only during this session.</span>
+          </label>
+          <label className="block text-sm mb-3">
+            <span className="block text-white/80 mb-1">Model</span>
+            <select value={localModel} onChange={(e)=>setLocalModel(e.target.value)}
+                    className="w-full h-11 rounded-xl border border-white/10 bg-white/5 text-white px-3">
+              <option value="gpt-4o-mini">gpt-4o-mini (vision + chat)</option>
+              <option value="gpt-4o">gpt-4o (vision + chat)</option>
+              <option value="gpt-4-turbo">gpt-4-turbo (text)</option>
+            </select>
+          </label>
+          <div className="flex items-center justify-end gap-2">
+            <Button onClick={()=>{ setLocalKey(""); setLocalModel("gpt-4o-mini"); }}>Clear</Button>
+            <PrimaryButton onClick={()=>{ setApiKey(localKey.trim()); setModel(localModel); setOpen(false); }}>Save</PrimaryButton>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
+/* Mount */
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
     </script>
   </body>
 </html>
